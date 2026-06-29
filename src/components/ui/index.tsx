@@ -50,15 +50,17 @@ export function ProgressBar({ value, color = 'var(--accent)' }: { value: number;
 
 // ── Card ──────────────────────────────────────────────────────
 export function Card({
-  children, style, onClick, hoverable,
+  children, style, onClick, hoverable, title
 }: {
   children: ReactNode;
   style?: React.CSSProperties;
   onClick?: () => void;
   hoverable?: boolean;
+  title?: string;
 }) {
   return (
     <div
+      title={title}
       onClick={onClick}
       style={{
         background: 'var(--bg-surface)',
@@ -101,7 +103,7 @@ export function SectionLabel({ children, style }: { children: ReactNode; style?:
 }
 
 // ── Skeleton ──────────────────────────────────────────────────
-export function Skeleton({ width = '100%', height = 16 }: { width?: number | string; height?: number }) {
+export function Skeleton({ width = '100%', height = 16 }: { width?: number | string; height?: number | string }) {
   return <div className="skeleton" style={{ width, height }} />;
 }
 

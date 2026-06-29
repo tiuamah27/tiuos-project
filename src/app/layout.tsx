@@ -7,6 +7,8 @@ export const metadata: Metadata = {
   description: 'Monitoring dashboard untuk infrastruktur Tiu Studio',
 };
 
+import { CommandPalette } from '@/components/ui/CommandPalette';
+
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="id" suppressHydrationWarning>
@@ -19,7 +21,10 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         />
       </head>
       <body>
-        <Providers>{children}</Providers>
+        <Providers>
+          {children}
+          <CommandPalette />
+        </Providers>
       </body>
     </html>
   );

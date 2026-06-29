@@ -85,11 +85,11 @@ function useSparkline(value: number) {
 }
 
 // ── Metric Card ───────────────────────────────────────────────
-function MetricCard({ label, value, unit, sub, pct, color, spark }:
-  { label: string; value: string | number; unit?: string; sub?: string; pct?: number; color: string; spark: { v: number }[] }
+function MetricCard({ label, value, unit, sub, pct, color, spark, tooltip }:
+  { label: string; value: string | number; unit?: string; sub?: string; pct?: number; color: string; spark: { v: number }[]; tooltip?: string }
 ) {
   return (
-    <Card style={{ flex: 1, minWidth: 140 }}>
+    <Card title={tooltip} style={{ flex: 1, minWidth: 140 }}>
       <div style={{ fontSize: 10, color: 'var(--text-muted)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: 8 }}>
         {label}
       </div>
@@ -102,7 +102,7 @@ function MetricCard({ label, value, unit, sub, pct, color, spark }:
           {sub && <div style={{ fontSize: 11, color: 'var(--text-muted)', marginTop: 3 }}>{sub}</div>}
         </div>
         {spark.length > 2 && (
-          <div style={{ width: 60, height: 28, flexShrink: 0 }}>
+          <div style={{ width: 60, height: 28, flexShrink: 0, pointerEvents: 'none' }}>
             <ResponsiveContainer width="100%" height="100%">
               <LineChart data={spark}>
                 <Line type="monotone" dataKey="v" stroke={color} strokeWidth={1.5} dot={false} isAnimationActive={false} />
@@ -260,22 +260,20 @@ function ContainerSection({ containers, isLoading, error }:
       noPadding
       fillHeight
     >
-      <div style={{ position: 'absolute', inset: 0, display: 'flex', flexDirection: 'column' }}>
+      <div style={{ display: 'flex', flexDirection: 'column', height: '100%', minHeight: 400 }}>
         {/* Table */}
-        <div style={{ flex: 1, minWidth: 0, overflow: 'auto' }}>
+        <div style={{ flex: 1, minWidth: 0, overflow: 'auto', overflowX: 'auto', WebkitOverflowScrolling: 'touch' }}>
           {/* Header */}
-          <div style={{
-            display: 'grid',
-            gridTemplateColumns: '1fr 100px 56px 80px 80px 90px',
+          <div className="container-grid" style={{
             padding: '8px 14px', borderBottom: '1px solid var(--border-default)',
             fontSize: 10, color: 'var(--text-muted)', fontWeight: 600,
             letterSpacing: '0.04em', textTransform: 'uppercase',
           }}>
             <span>Container</span>
             <span>Status</span>
-            <span style={{ textAlign: 'right' }}>CPU</span>
-            <span style={{ textAlign: 'right' }}>RAM</span>
-            <span style={{ textAlign: 'right' }}>Port</span>
+            <span className="hide-on-mobile" style={{ textAlign: 'right' }}>CPU</span>
+            <span className="hide-on-mobile" style={{ textAlign: 'right' }}>RAM</span>
+            <span className="hide-on-mobile" style={{ textAlign: 'right' }}>Port</span>
             <span style={{ textAlign: 'right' }}>Uptime</span>
           </div>
           {isLoading && Array.from({ length: 5 }).map((_, i) => (
@@ -289,10 +287,9 @@ function ContainerSection({ containers, isLoading, error }:
             return (
               <Fragment key={c.id}>
                 <div
+                  className="container-grid"
                   onClick={() => setSelected(prev => prev?.id === c.id ? null : c)}
                   style={{
-                    display: 'grid',
-                    gridTemplateColumns: '1fr 100px 56px 80px 80px 90px',
                     padding: '10px 14px', borderBottom: '1px solid var(--border-subtle)',
                     alignItems: 'center', cursor: 'pointer',
                     background: isSelected ? 'var(--accent-bg)' : 'transparent',
@@ -307,13 +304,13 @@ function ContainerSection({ containers, isLoading, error }:
                   <div>
                     <StatusBadge variant={statusVariant(c.status)}>{statusLabel(c.status)}</StatusBadge>
                   </div>
-                  <span style={{ fontSize: 12, color: 'var(--text-secondary)', textAlign: 'right' }}>
+                  <span className="hide-on-mobile" style={{ fontSize: 12, color: 'var(--text-secondary)', textAlign: 'right' }}>
                     {c.status === 'running' ? `${c.cpu.toFixed(1)}%` : '—'}
                   </span>
-                  <span style={{ fontSize: 12, color: 'var(--text-secondary)', textAlign: 'right' }}>
+                  <span className="hide-on-mobile" style={{ fontSize: 12, color: 'var(--text-secondary)', textAlign: 'right' }}>
                     {c.status === 'running' ? `${c.ram} MB` : '—'}
                   </span>
-                  <span style={{ fontSize: 11, color: 'var(--text-muted)', fontFamily: 'JetBrains Mono, monospace', textAlign: 'right', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                  <span className="hide-on-mobile" style={{ fontSize: 11, color: 'var(--text-muted)', fontFamily: 'JetBrains Mono, monospace', textAlign: 'right', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
                     {c.ports[0] ?? '—'}
                   </span>
                   <span style={{ fontSize: 12, color: 'var(--text-secondary)', textAlign: 'right' }}>{c.uptime}</span>
@@ -880,15 +877,15 @@ export default function UnifiedDashboard() {
             </div>
           ) : metrics ? (
             <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', marginBottom: 12 }}>
-              <MetricCard label="CPU" value={metrics.cpu.toFixed(0)} unit="%" sub={metrics.cpuInfo ? `${metrics.cpuInfo.cores} cores @ ${metrics.cpuInfo.ghz} GHz` : undefined} pct={metrics.cpu} color={cpuColor(metrics.cpu)} spark={cpuSpark} />
-              <MetricCard label="RAM" value={metrics.ram.used.toFixed(1)} unit="GB" sub={`${metrics.ram.percent.toFixed(0)}% dari ${metrics.ram.total} GB`} pct={metrics.ram.percent} color={metrics.ram.percent > 80 ? 'var(--warning)' : 'var(--accent)'} spark={ramSpark} />
-              <MetricCard label="Disk" value={metrics.disk.used.toFixed(0)} unit="GB" sub={`${metrics.disk.percent.toFixed(0)}% dari ${metrics.disk.total} GB`} pct={metrics.disk.percent} color={diskColor(metrics.disk.percent)} spark={[]} />
-              <MetricCard label="Network" value={`↓ ${metrics.network.download.toFixed(1)}`} unit="Mbps" sub={`↑ ${metrics.network.upload.toFixed(1)} Mbps`} color="var(--info)" spark={dlSpark} />
-              <MetricCard label="Uptime" value={metrics.uptime} color="var(--text-secondary)" spark={[]} />
+              <MetricCard label="CPU" value={metrics.cpu.toFixed(0)} unit="%" sub={metrics.cpuInfo ? `${metrics.cpuInfo.cores} cores @ ${metrics.cpuInfo.ghz} GHz` : undefined} pct={metrics.cpu} color={cpuColor(metrics.cpu)} spark={cpuSpark} tooltip="Persentase penggunaan CPU saat ini oleh semua proses di server" />
+              <MetricCard label="RAM" value={metrics.ram.used.toFixed(1)} unit="GB" sub={`${metrics.ram.percent.toFixed(0)}% dari ${metrics.ram.total} GB`} pct={metrics.ram.percent} color={metrics.ram.percent > 80 ? 'var(--warning)' : 'var(--accent)'} spark={ramSpark} tooltip="Kapasitas memori utama (RAM) yang terpakai" />
+              <MetricCard label="Disk" value={metrics.disk.used.toFixed(0)} unit="GB" sub={`${metrics.disk.percent.toFixed(0)}% dari ${metrics.disk.total} GB`} pct={metrics.disk.percent} color={diskColor(metrics.disk.percent)} spark={[]} tooltip="Kapasitas penyimpanan yang terpakai pada partisi utama (/)" />
+              <MetricCard label="Network" value={`↓ ${metrics.network.download.toFixed(1)}`} unit="Mbps" sub={`↑ ${metrics.network.upload.toFixed(1)} Mbps`} color="var(--info)" spark={dlSpark} tooltip="Kecepatan jaringan masuk dan keluar (Download / Upload) dalam Mbps" />
+              <MetricCard label="Uptime" value={metrics.uptime} color="var(--text-secondary)" spark={[]} tooltip="Lama waktu server menyala sejak restart terakhir" />
             </div>
           ) : <ErrorState message="Tidak dapat memuat data sistem" />}
           
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
+          <div className="grid-layout" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
             <ChartCard title="CPU (%)" data={history} dataKey="cpu" color={cpuColor(latestCpu)} unit="%" yMax={100} />
             <ChartCard title="RAM (%)" data={history} dataKey="ram" color="var(--accent)" unit="%" yMax={100} />
             <ChartCard title="Network Download (Mbps)" data={history} dataKey="dl" color="var(--info)" unit=" Mbps" />
@@ -902,7 +899,7 @@ export default function UnifiedDashboard() {
         </Panel>
 
         {/* ═══ SECTION 3: Apps (full cards) + Activity ═══ */}
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 320px', gap: 12 }}>
+        <div className="grid-layout" style={{ display: 'grid', gridTemplateColumns: '1fr 320px', gap: 12 }}>
           <AppsSection apps={apps} isLoading={loadingApps} error={appsError} />
 
           <Panel title="Activity Feed" icon={<History size={14} />} noPadding fillHeight>
@@ -915,7 +912,7 @@ export default function UnifiedDashboard() {
         </div>
 
         {/* ═══ SECTION 2: Storage & Containers ═══ */}
-        <div style={{ display: 'grid', gridTemplateColumns: '440px 1fr', gap: 12 }}>
+        <div className="grid-layout" style={{ display: 'grid', gridTemplateColumns: '440px 1fr', gap: 12 }}>
           <StorageSection storage={storage} isLoading={loadingStorage} error={storageError} />
           <ContainerSection containers={containers} isLoading={loadingContainers} error={containerError} />
         </div>

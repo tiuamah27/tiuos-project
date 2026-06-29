@@ -1,9 +1,10 @@
 'use client';
 
-import { RefreshCw, ChevronDown, Database } from 'lucide-react';
+import { RefreshCw, Database, Moon, Sun } from 'lucide-react';
 import { useTiuStore } from '@/store';
 import { useQueryClient } from '@tanstack/react-query';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { useTheme } from 'next-themes';
 
 interface TopBarProps {
   title: string;
@@ -13,7 +14,10 @@ interface TopBarProps {
 export function TopBar({ title, subtitle }: TopBarProps) {
   const { servers, activeServerId, setActiveServer, dataMode, setDataMode } = useTiuStore();
   const queryClient = useQueryClient();
-  const [showDropdown, setShowDropdown] = useState(false);
+  const { theme, setTheme } = useTheme();
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => setMounted(true), []);
 
   function handleRefresh() {
     queryClient.invalidateQueries();
@@ -33,7 +37,7 @@ export function TopBar({ title, subtitle }: TopBarProps) {
       zIndex: 10,
     }}>
       {/* Page title */}
-      <div style={{ marginRight: 8 }}>
+      <div className="hide-on-mobile" style={{ marginRight: 8, display: 'flex', flexDirection: 'column', justifyContent: 'center', flexShrink: 0 }}>
         <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--text-primary)', lineHeight: 1 }}>
           {title}
         </div>
@@ -45,10 +49,10 @@ export function TopBar({ title, subtitle }: TopBarProps) {
       </div>
 
       {/* Divider */}
-      <div style={{ width: 1, height: 20, background: 'var(--border-default)', flexShrink: 0 }} />
+      <div className="hide-on-mobile" style={{ width: 1, height: 20, background: 'var(--border-default)', flexShrink: 0 }} />
 
       {/* Server switcher */}
-      <div style={{ display: 'flex', gap: 6 }}>
+      <div style={{ display: 'flex', gap: 6, flexWrap: 'nowrap', overflowX: 'auto', WebkitOverflowScrolling: 'touch', paddingBottom: 2, flex: 1, alignItems: 'center' }}>
         {servers.map(server => {
           const active = server.id === activeServerId;
           return (
@@ -57,7 +61,7 @@ export function TopBar({ title, subtitle }: TopBarProps) {
               onClick={() => setActiveServer(server.id)}
               style={{
                 display: 'flex', alignItems: 'center', gap: 6,
-                padding: '4px 10px', borderRadius: 6,
+                padding: '4px 10px', borderRadius: 6, flexShrink: 0,
                 border: `1px solid ${active ? 'var(--accent-border)' : 'var(--border-default)'}`,
                 background: active ? 'var(--accent-bg)' : 'transparent',
                 color: active ? 'var(--accent)' : 'var(--text-secondary)',
@@ -72,7 +76,7 @@ export function TopBar({ title, subtitle }: TopBarProps) {
               }} className={active ? 'pulse' : ''} />
               {server.name}
               {server.location && (
-                <span style={{ fontSize: 10, color: 'var(--text-muted)' }}>
+                <span className="hide-on-mobile" style={{ fontSize: 10, color: 'var(--text-muted)' }}>
                   ({server.location})
                 </span>
               )}
@@ -81,8 +85,9 @@ export function TopBar({ title, subtitle }: TopBarProps) {
         })}
       </div>
 
-      {/* Spacer */}
-      <div style={{ flex: 1 }} />
+      {/* Spacer is replaced by flex: 1 on the server switcher container for better mobile layout, 
+          but we still need a gap if it doesn't take full width on desktop */}
+      <div className="hide-on-mobile" style={{ flex: 1 }} />
 
       {/* Data mode badge */}
       <button
@@ -111,6 +116,27 @@ export function TopBar({ title, subtitle }: TopBarProps) {
           {dataMode === 'mock' ? 'MOCK' : 'LIVE'}
         </span>
       </button>
+
+      {/* Theme toggle */}
+      {mounted && (
+        <button
+          onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
+          title={`Switch to ${theme === 'dark' ? 'Light' : 'Dark'} mode`}
+          style={{
+            width: 30, height: 30, borderRadius: 6,
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            border: '1px solid var(--border-default)',
+            background: 'transparent',
+            color: 'var(--text-muted)',
+            cursor: 'pointer',
+            transition: 'all 0.15s',
+          }}
+          onMouseEnter={e => (e.currentTarget.style.color = 'var(--text-primary)')}
+          onMouseLeave={e => (e.currentTarget.style.color = 'var(--text-muted)')}
+        >
+          {theme === 'dark' ? <Sun size={14} /> : <Moon size={14} />}
+        </button>
+      )}
 
       {/* Refresh button */}
       <button

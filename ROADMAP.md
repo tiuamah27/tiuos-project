@@ -179,23 +179,21 @@ Fitur yang sudah selesai:
 > **Goal:** Meningkatkan kualitas tampilan dan pengalaman pengguna
 
 ### 7.1 Theming
-- [ ] Dark mode (sudah ada) ✅
-- [ ] Light mode
-- [ ] Theme toggle di topbar
-- [ ] Custom accent color picker
+- [x] Dark mode (sudah ada) ✅
+- [x] Light mode
+- [x] Theme toggle di topbar
 
-### 7.2 Responsive Design
-- [ ] Mobile layout (< 768px)
-- [ ] Tablet layout (768px - 1024px)
-- [ ] Collapsible sidebar di mobile (hamburger menu)
-- [ ] Touch-friendly interactions
+### Phase 7: UI & Aesthetics Polish 
+- [x] Responsive layout untuk Mobile (Dashboard layout responsif, hamburger menu dll) -> *(Dibatalkan: Sidebar dan hamburger menu dihapus atas permintaan)*
+- [x] Tambahkan Color Picker untuk kustomisasi aksen warna -> *(Dibatalkan: Dihapus atas permintaan)*
+- [x] Native Tooltips pada Stat Cards dan Metric Cards
 
 ### 7.3 User Experience
-- [ ] Keyboard shortcuts (Ctrl+K command palette)
-- [ ] Loading skeleton untuk semua section (sudah partial) ✅
-- [ ] Error boundary & graceful error handling
-- [ ] Onboarding / first-time setup wizard
-- [ ] Tooltip untuk setiap metrik (penjelasan singkat)
+- [x] Keyboard shortcuts (Ctrl+K command palette)
+- [x] Loading skeleton untuk semua section (sudah partial) ✅
+- [x] Error boundary & graceful error handling
+- [x] Onboarding / first-time setup wizard (Dilewati untuk versi 0.1)
+- [x] Tooltip untuk setiap metrik (penjelasan singkat)
 
 ---
 

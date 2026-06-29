@@ -39,6 +39,26 @@
   --sidebar-width: 52px;
 }
 
+[data-theme='light'] {
+  /* Base */
+  --bg-base: #f7f7f7;
+  --bg-surface: #ffffff;
+  --bg-elevated: #f0f0f0;
+  --bg-hover: #e8e8e8;
+  --bg-active: #e0e0e0;
+
+  /* Border */
+  --border-subtle: #e5e5e5;
+  --border-default: #d4d4d4;
+  --border-strong: #a3a3a3;
+
+  /* Text */
+  --text-primary: #171717;
+  --text-secondary: #525252;
+  --text-muted: #737373;
+  --text-disabled: #a3a3a3;
+}
+
 * { box-sizing: border-box; }
 
 html, body {
@@ -85,4 +105,49 @@ html, body {
   background-size: 200% 100%;
   animation: shimmer 1.5s infinite;
   border-radius: 4px;
+}
+
+/* Responsive Utilities */
+@media (max-width: 1024px) {
+  .grid-layout {
+    grid-template-columns: 1fr !important;
+  }
+  .hide-on-mobile {
+    display: none !important;
+  }
+  .app-sidebar {
+    position: fixed;
+    height: 100vh;
+    left: 0;
+    top: 0;
+    transform: translateX(-100%);
+    transition: transform 0.3s ease;
+    z-index: 50;
+  }
+  .app-sidebar.open {
+    transform: translateX(0);
+  }
+  .mobile-menu-btn {
+    display: flex !important;
+  }
+}
+
+@media (min-width: 1025px) {
+  .hide-on-desktop {
+    display: none !important;
+  }
+}
+
+.mobile-menu-btn {
+  display: none;
+}
+
+.container-grid {
+  display: grid;
+  grid-template-columns: 1fr 100px 56px 80px 80px 90px;
+}
+@media (max-width: 1024px) {
+  .container-grid {
+    grid-template-columns: 1fr 100px 90px;
+  }
 }

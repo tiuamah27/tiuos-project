@@ -2,7 +2,12 @@ version: '3.8'
 
 services:
   tiuos:
-    build: .
+    build:
+      context: .
+      args:
+        - NEXT_PUBLIC_DATA_MODE=live
+        - NEXT_PUBLIC_DEFAULT_SERVER=tiuserver
+        - NEXT_PUBLIC_SERVERS=[{"id":"tiuserver","name":"TiuServer","url":"https://api.tiuserver.my.id"}]
     container_name: tiuos
     restart: always
     ports:

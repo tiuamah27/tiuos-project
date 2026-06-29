@@ -17,7 +17,7 @@ Semua aplikasi dan infrastruktur disimpan di dalam folder `/opt/`. Folder ini di
 
 ### `/opt/apps/` (Aplikasi Utama / User-facing)
 Tempat menyimpan aplikasi yang digunakan langsung oleh pengguna.
-- 📁 `/opt/apps/tiuos-project` (Frontend TiuOS, port `3010`)
+- 📁 `/opt/apps/tiuos` (Frontend TiuOS, port `3010`)
 - 📁 `/opt/apps/hanfin` (Aplikasi Keuangan HanFin, port `3000`)
 - 📁 `/opt/apps/n8n` (Aplikasi Otomatisasi Workflow, port `5678`)
 
@@ -69,7 +69,7 @@ Berikut adalah contekan perintah Linux/Docker yang sering digunakan saat mengelo
 ### Memperbarui Aplikasi (TiuOS / TiuAgent)
 Jika ada perubahan kode di GitHub dan Anda ingin menerapkannya di server:
 ```bash
-cd /opt/apps/tiuos-project  # Atau /opt/infra/tiu-agent
+cd /opt/apps/tiuos  # Atau /opt/infra/tiu-agent
 sudo git pull
 sudo docker compose up -d --build
 ```

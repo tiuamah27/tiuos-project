@@ -6,7 +6,7 @@ services:
     container_name: tiuos
     restart: always
     ports:
-      - "3000:3000"
+      - "3010:3000"
     environment:
       - NEXT_PUBLIC_API_URL=https://api.tiuserver.my.id
     networks:

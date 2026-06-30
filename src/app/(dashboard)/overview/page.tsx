@@ -92,7 +92,7 @@ export default function OverviewPage() {
               <div style={{ fontSize: 28, fontWeight: 700, color: cpuColor(totalRamPercent) }}>
                 {totalRamUsed.toFixed(1)} / {totalRamTotal.toFixed(1)} GB
               </div>
-              <ProgressBar value={totalRamPercent} color={cpuColor(totalRamPercent)} height={6} />
+              <ProgressBar value={totalRamPercent} color={cpuColor(totalRamPercent)} />
             </Card>
           </div>
 

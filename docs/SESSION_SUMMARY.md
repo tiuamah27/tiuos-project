@@ -83,3 +83,77 @@ Malam ini, kita telah menyelesaikan rentetan pengembangan yang sangat intens dan
 **Catatan Akhir (Final State):**
 Dasbor TiuOS kini bukan sekadar simulasi kosong; semua pipa antar-muka telah terhubung sempurna untuk menerima asupan data murni dari TiuAgent v2.
 
+---
+
+## [2026-06-30 Malam] — Terminal Live, Bug Fixes & Documentation
+
+Sesi malam ini difokuskan pada menghidupkan fitur Terminal Web SSH agar benar-benar berfungsi secara nyata (bukan simulasi), serta memperbaiki beberapa bug pasca-deployment.
+
+### 1. TopBar Sticky
+- **Masalah:** Bar navigasi atas (TopBar) ikut ter-scroll ke atas saat konten halaman di-scroll ke bawah.
+- **Solusi:** Mengubah `position: 'relative'` menjadi `position: 'sticky'` dengan `top: 0` dan `zIndex: 50` pada komponen `TopBar.tsx`.
+
+### 2. App Detail — Fix TypeScript Error
+- **Masalah:** Halaman detail aplikasi (`/apps/[id]`) error saat mode Live karena tipe TypeScript tidak cocok dan navigasi yang salah.
+- **Solusi:** Memperbaiki logika navigasi dan kompatibilitas tipe data agar sesuai dengan respons API TiuAgent.
+
+### 3. Terminal Web SSH — Phase 3 LIVE ✅
+Ini adalah pencapaian utama malam ini. Terminal Web yang sebelumnya hanya berupa *placeholder* (Mock) kini benar-benar terhubung ke server fisik.
+
+#### Backend (TiuAgent):
+- **Dependency baru:** `@fastify/websocket` dan `node-pty` (virtual terminal / pseudo-TTY).
+- **Route baru:** `src/routes/terminal.ts` — Endpoint WebSocket `GET /api/v1/terminal`.
+  - Saat klien browser terhubung, TiuAgent men-*spawn* proses `bash` menggunakan `node-pty`.
+  - Output `bash` langsung di-*stream* ke WebSocket → Browser.
+  - Input dari browser langsung diteruskan ke `bash` → Server.
+  - Mendukung *resize* terminal secara dinamis.
+- **Dockerfile:** Ditambahkan `python3`, `make`, dan `g++` agar `node-pty` (native C++ module) bisa dikompilasi.
+- **Bug Fix:** Memperbaiki API `@fastify/websocket` v11 — parameter pertama handler adalah `socket` langsung, bukan `connection.socket`.
+
+#### Frontend (TiuOS):
+- **Dependency baru:** `@xterm/addon-attach` — menghubungkan WebSocket langsung ke Xterm.js.
+- **`TerminalClient.tsx`:** Direfaktor total untuk mendukung mode Live (WebSocket + AttachAddon) dan Mock.
+- **`terminal/page.tsx`:** Menghitung `wsUrl` dari konfigurasi server aktif.
+
+#### Infrastruktur (Cloudflare Tunnel Fix):
+- **Masalah:** Browser di `https://tiuos.tiuserver.my.id` tidak bisa WebSocket ke `ws://192.168.1.2:8080` (Mixed Content).
+- **Solusi:** Menambahkan field `publicUrl` pada `ServerConfig` → WebSocket melalui `wss://api.tiuserver.my.id/api/v1/terminal`.
+
+#### Hasil:
+Terminal Web SSH **100% berfungsi**. Dari browser, pengguna bisa mengetikkan `whoami`, `free -m`, `df -h`, dll dan mendapatkan output real-time dari server fisik.
+
+### 4. Dokumentasi
+- **ROADMAP.md:** Diperbarui — menandai fitur koneksi WebSocket Terminal sebagai selesai.
+- **tiuserver-docs.html:** Diperbarui untuk mencakup TiuOS dan TiuAgent.
+
+---
+
+## 📋 PR (Pekerjaan Rumah) — Yang Harus Dikerjakan Selanjutnya
+
+### Prioritas Tinggi
+1. **Terminal berjalan di dalam Container**
+   - Saat ini terminal berjalan di dalam Docker container `tiu-agent` (bukan langsung di host). Perintah seperti `cd /opt/apps/tiuos` tidak akan ditemukan karena path tersebut ada di mesin host, bukan di container.
+   - **Solusi:** Tambahkan volume mount atau gunakan `nsenter` agar terminal bisa mengakses filesystem host.
+
+2. **Multiple Tab Terminal**
+   - Saat ini hanya ada satu sesi terminal. Perlu ditambahkan dukungan *tab* agar pengguna bisa membuka beberapa sesi terminal sekaligus.
+
+3. **Riwayat Command (History)**
+   - Menyimpan riwayat perintah yang diketikkan agar bisa diakses kembali (panah atas/bawah).
+
+### Prioritas Sedang
+4. **Keamanan Terminal (Phase 8)**
+   - Terminal saat ini berjalan sebagai `root` tanpa autentikasi. Sangat berbahaya jika TiuOS diakses oleh orang lain.
+   - **PR:** Implementasi login page + session management sebelum Terminal bisa digunakan.
+
+5. **App Detail Page — Mode Live**
+   - Halaman `/apps/[id]` perlu endpoint backend baru: `GET /api/v1/docker/:id/details`.
+
+6. **Network Stats Error**
+   - Log TiuAgent: `ENOENT: '/host/sys/class/net/eno1/statistics/rx_bytes'`.
+   - **PR:** Periksa volume mount atau deteksi interface jaringan secara otomatis.
+
+### Prioritas Rendah
+7. **Phase 5 — Backup Manager**
+8. **Phase 10 — IoT & Server Rack Monitoring (ESP32 + Sensor Suhu + MQTT)**
+9. **Quick Commands yang bisa di-custom dari UI**

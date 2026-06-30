@@ -30,18 +30,20 @@ export default function TerminalPage() {
   const [sessionExpired, setSessionExpired] = useState(false);
   const { dataMode, servers, activeServerId } = useTiuStore();
 
-  const serverUrl = servers.find(s => s.id === activeServerId)?.url;
+  const activeServer = servers.find(s => s.id === activeServerId);
 
   const wsUrl = useMemo(() => {
-    if (dataMode !== 'live' || !serverUrl) return undefined;
+    if (dataMode !== 'live' || !activeServer) return undefined;
+    // Prefer publicUrl (browser-accessible, e.g. Cloudflare Tunnel) over internal url
+    const baseUrl = activeServer.publicUrl || activeServer.url;
     try {
-      const url = new URL(serverUrl);
+      const url = new URL(baseUrl);
       url.protocol = url.protocol === 'https:' ? 'wss:' : 'ws:';
       return `${url.origin}/api/v1/terminal`;
     } catch {
       return undefined;
     }
-  }, [dataMode, serverUrl]);
+  }, [dataMode, activeServer]);
 
   const handleCommand = (cmd: string) => {
     if (sessionExpired) {

@@ -5,7 +5,8 @@
 export interface ServerConfig {
   id: string;
   name: string;
-  url: string;
+  url: string;          // Internal URL for server-side API calls (e.g. http://192.168.1.2:8080)
+  publicUrl?: string;   // Public URL for browser-side connections like WebSocket (e.g. https://api.tiuserver.my.id)
   location?: string;
 }
 

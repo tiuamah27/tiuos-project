@@ -97,8 +97,18 @@ export const TerminalClient = ({ onCommand, onIdleTimeout, idleTimeoutMs = 30000
       term.loadAddon(attachAddon);
 
       ws.onopen = () => {
+        term.writeln('\x1b[32m[Connected to Live Server]\x1b[0m');
         // Send initial resize
         ws.send(JSON.stringify({ type: 'resize', cols: term.cols, rows: term.rows }));
+      };
+
+      ws.onerror = (e) => {
+        term.writeln('\r\n\x1b[31m[WebSocket Error] Connection failed to: ' + wsUrl + '\x1b[0m');
+        console.error('WebSocket error:', e);
+      };
+
+      ws.onclose = (e) => {
+        term.writeln(`\r\n\x1b[33m[WebSocket Closed] Code: ${e.code}, Reason: ${e.reason || 'No reason provided'}\x1b[0m`);
       };
 
       term.onData(() => resetIdleTimer());

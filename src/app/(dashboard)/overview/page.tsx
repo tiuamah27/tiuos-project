@@ -107,8 +107,7 @@ export default function OverviewPage() {
                   border: '1px solid var(--border-default)',
                   opacity: item.status === 'offline' ? 0.7 : 1
                 }}
-                onMouseEnter={e => e.currentTarget.style.borderColor = 'var(--accent)'}
-                onMouseLeave={e => e.currentTarget.style.borderColor = 'var(--border-default)'}
+                hoverable
                 onClick={() => handleServerClick(item.server.id)}
               >
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 16 }}>

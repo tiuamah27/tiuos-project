@@ -85,12 +85,12 @@ Fitur yang sudah selesai:
 > **Goal:** Akses terminal server langsung dari browser tanpa perlu SSH client
 
 ### 3.1 Terminal Emulator
-- [x] Embedded terminal menggunakan xterm.js
-- [x] Koneksi ke server via WebSocket
+- [x] Embedded terminal UI menggunakan xterm.js
+- [ ] Koneksi ke server via WebSocket (Backend TiuAgent)
 - [x] Support copy/paste
 - [x] Support resize terminal
-- [x] Multiple tab terminal
-- [x] Riwayat command
+- [ ] Multiple tab terminal
+- [ ] Riwayat command (History)
 
 ### 3.2 Quick Commands
 - [x] Predefined quick commands (restart docker, check disk, dll)

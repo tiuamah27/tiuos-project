@@ -86,7 +86,7 @@ Fitur yang sudah selesai:
 
 ### 3.1 Terminal Emulator
 - [x] Embedded terminal UI menggunakan xterm.js
-- [ ] Koneksi ke server via WebSocket (Backend TiuAgent)
+- [x] Koneksi ke server via WebSocket (Backend TiuAgent)
 - [x] Support copy/paste
 - [x] Support resize terminal
 - [ ] Multiple tab terminal

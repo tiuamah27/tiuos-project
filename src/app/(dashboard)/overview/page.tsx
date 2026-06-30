@@ -150,8 +150,8 @@ export default function OverviewPage() {
                     </div>
                     
                     <div style={{ display: 'flex', gap: 16, marginTop: 8, paddingTop: 12, borderTop: '1px solid var(--border-subtle)', fontSize: 12, color: 'var(--text-secondary)' }}>
-                      <span style={{ display: 'flex', alignItems: 'center', gap: 6 }}><Activity size={14} /> Load: {item.metrics.loadAvg[0].toFixed(2)}</span>
-                      <span style={{ display: 'flex', alignItems: 'center', gap: 6 }}><HardDrive size={14} /> Disk: {item.metrics.disk.percent.toFixed(0)}%</span>
+                      <span style={{ display: 'flex', alignItems: 'center', gap: 6 }}><Activity size={14} /> Load: {item.metrics.loadAvg?.[0]?.toFixed(2) ?? 'N/A'}</span>
+                      <span style={{ display: 'flex', alignItems: 'center', gap: 6 }}><HardDrive size={14} /> Disk: {item.metrics.disk?.percent?.toFixed(0) ?? 0}%</span>
                     </div>
                   </div>
                 ) : (

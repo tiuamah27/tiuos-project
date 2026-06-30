@@ -197,11 +197,11 @@ export default function SettingsPage() {
                         <>
                           <div>
                             <label style={{ display: 'block', fontSize: 12, color: 'var(--text-muted)', marginBottom: 4 }}>Bot Token</label>
-                            <input type="password" value={ch.telegramToken ?? ''} onChange={e => updateChannel(ch.type, { telegramToken: e.target.value })} style={{ width: '100%', padding: '6px 10px', background: 'var(--bg-base)', border: '1px solid var(--border-default)', borderRadius: 4, color: 'var(--text-primary)', fontSize: 13 }} placeholder="123456:ABC-DEF1234ghIkl-zyx57W2v1u123ew11" />
+                            <input type="password" value={ch.token ?? ''} onChange={e => updateChannel(ch.type, { token: e.target.value })} style={{ width: '100%', padding: '6px 10px', background: 'var(--bg-base)', border: '1px solid var(--border-default)', borderRadius: 4, color: 'var(--text-primary)', fontSize: 13 }} placeholder="123456:ABC-DEF1234ghIkl-zyx57W2v1u123ew11" />
                           </div>
                           <div>
                             <label style={{ display: 'block', fontSize: 12, color: 'var(--text-muted)', marginBottom: 4 }}>Chat ID</label>
-                            <input type="text" value={ch.telegramChatId ?? ''} onChange={e => updateChannel(ch.type, { telegramChatId: e.target.value })} style={{ width: '100%', padding: '6px 10px', background: 'var(--bg-base)', border: '1px solid var(--border-default)', borderRadius: 4, color: 'var(--text-primary)', fontSize: 13 }} placeholder="-1001234567890" />
+                            <input type="text" value={ch.chatId ?? ''} onChange={e => updateChannel(ch.type, { chatId: e.target.value })} style={{ width: '100%', padding: '6px 10px', background: 'var(--bg-base)', border: '1px solid var(--border-default)', borderRadius: 4, color: 'var(--text-primary)', fontSize: 13 }} placeholder="-1001234567890" />
                           </div>
                         </>
                       )}
@@ -209,7 +209,7 @@ export default function SettingsPage() {
                       {ch.type === 'discord' && (
                         <div>
                           <label style={{ display: 'block', fontSize: 12, color: 'var(--text-muted)', marginBottom: 4 }}>Webhook URL</label>
-                          <input type="password" value={ch.discordWebhook ?? ''} onChange={e => updateChannel(ch.type, { discordWebhook: e.target.value })} style={{ width: '100%', padding: '6px 10px', background: 'var(--bg-base)', border: '1px solid var(--border-default)', borderRadius: 4, color: 'var(--text-primary)', fontSize: 13 }} placeholder="https://discord.com/api/webhooks/..." />
+                          <input type="password" value={ch.webhookUrl ?? ''} onChange={e => updateChannel(ch.type, { webhookUrl: e.target.value })} style={{ width: '100%', padding: '6px 10px', background: 'var(--bg-base)', border: '1px solid var(--border-default)', borderRadius: 4, color: 'var(--text-primary)', fontSize: 13 }} placeholder="https://discord.com/api/webhooks/..." />
                         </div>
                       )}
 

@@ -44,11 +44,11 @@ export function useAlertMonitor() {
     if (metrics.cpu > alertThresholds.cpu) {
       triggerAlert('cpu', 'High CPU Usage', `CPU usage is at ${metrics.cpu.toFixed(1)}%, exceeding threshold of ${alertThresholds.cpu}%`, 'warning');
     }
-    if (metrics.ram > alertThresholds.ram) {
-      triggerAlert('ram', 'High RAM Usage', `RAM usage is at ${metrics.ram.toFixed(1)}%, exceeding threshold of ${alertThresholds.ram}%`, 'warning');
+    if (metrics.ram.percent > alertThresholds.ram) {
+      triggerAlert('ram', 'High RAM Usage', `RAM usage is at ${metrics.ram.percent.toFixed(1)}%, exceeding threshold of ${alertThresholds.ram}%`, 'warning');
     }
-    if (metrics.disk > alertThresholds.disk) {
-      triggerAlert('disk', 'High Disk Usage', `Disk usage is at ${metrics.disk.toFixed(1)}%, exceeding threshold of ${alertThresholds.disk}%`, 'warning');
+    if (metrics.disk.percent > alertThresholds.disk) {
+      triggerAlert('disk', 'High Disk Usage', `Disk usage is at ${metrics.disk.percent.toFixed(1)}%, exceeding threshold of ${alertThresholds.disk}%`, 'warning');
     }
   }, [metrics, alertThresholds, addNotification, channels]);
 
@@ -59,7 +59,7 @@ export function useAlertMonitor() {
 
     containers.forEach(c => {
       // Alert for exited container if it is not expected
-      if (c.status === 'exited' || c.status === 'dead') {
+      if (c.status === 'stopped' || c.status === 'dead') {
         const id = `container_down_${c.id}`;
         if (now - (lastAlerts.current[id] || 0) > cooldown) {
           lastAlerts.current[id] = now;

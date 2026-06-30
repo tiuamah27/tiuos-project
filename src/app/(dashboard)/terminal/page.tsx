@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useRef, useState, useEffect } from 'react';
+import React, { useRef, useState, useEffect, useMemo } from 'react';
 import dynamic from 'next/dynamic';
 import { Card, SectionLabel, TerminalClientRef } from '@/components/ui';
 import { TerminalSquare, Play, History, ShieldAlert } from 'lucide-react';
@@ -28,7 +28,20 @@ export default function TerminalPage() {
   const terminalRef = useRef<TerminalClientRef>(null);
   const [auditLogs, setAuditLogs] = useState<AuditLog[]>([]);
   const [sessionExpired, setSessionExpired] = useState(false);
-  const { dataMode } = useTiuStore();
+  const { dataMode, servers, activeServerId } = useTiuStore();
+
+  const serverUrl = servers.find(s => s.id === activeServerId)?.url;
+
+  const wsUrl = useMemo(() => {
+    if (dataMode !== 'live' || !serverUrl) return undefined;
+    try {
+      const url = new URL(serverUrl);
+      url.protocol = url.protocol === 'https:' ? 'wss:' : 'ws:';
+      return `${url.origin}/api/v1/terminal`;
+    } catch {
+      return undefined;
+    }
+  }, [dataMode, serverUrl]);
 
   const handleCommand = (cmd: string) => {
     if (sessionExpired) {
@@ -86,13 +99,8 @@ export default function TerminalPage() {
         }
         terminalRef.current?.prompt();
       }, 200);
-    } else {
-      // In live mode, this would send the command to the WebSocket
-      terminalRef.current?.writeln('Connecting to live server...');
-      setTimeout(() => {
-        terminalRef.current?.writeln(`bash: ${cmd}: command executed (LIVE placeholder)`);
-        terminalRef.current?.prompt();
-      }, 500);
+      // In live mode, command logic is handled via websocket directly in TerminalClient.
+      // This is just to log the command execution locally.
     }
   };
 
@@ -139,7 +147,8 @@ export default function TerminalPage() {
             onCommand={handleCommand} 
             onIdleTimeout={handleIdleTimeout} 
             idleTimeoutMs={300000} // 5 minutes
-            initialText="Welcome to TiuOS Web Terminal.\r\nType 'help' to see available mock commands."
+            initialText={wsUrl ? "Connecting to live server..." : "Welcome to TiuOS Web Terminal.\r\nType 'help' to see available mock commands."}
+            wsUrl={wsUrl}
           />
         </div>
       </div>

@@ -1,8 +1,9 @@
 'use client';
 
-import React, { useEffect, useRef, useState, useImperativeHandle, forwardRef } from 'react';
+import React, { useEffect, useRef, useImperativeHandle } from 'react';
 import { Terminal } from '@xterm/xterm';
 import { FitAddon } from '@xterm/addon-fit';
+import { AttachAddon } from '@xterm/addon-attach';
 import '@xterm/xterm/css/xterm.css';
 
 export interface TerminalClientRef {
@@ -13,19 +14,21 @@ export interface TerminalClientRef {
 }
 
 interface TerminalClientProps {
-  onCommand: (cmd: string) => void;
+  onCommand?: (cmd: string) => void;
   onIdleTimeout: () => void;
   idleTimeoutMs?: number;
   initialText?: string;
   innerRef?: React.Ref<TerminalClientRef>;
+  wsUrl?: string; // If provided, attaches to the WebSocket instead of using mock parser
 }
 
-export const TerminalClient = ({ onCommand, onIdleTimeout, idleTimeoutMs = 300000, initialText, innerRef }: TerminalClientProps) => {
+export const TerminalClient = ({ onCommand, onIdleTimeout, idleTimeoutMs = 300000, initialText, innerRef, wsUrl }: TerminalClientProps) => {
   const terminalRef = useRef<HTMLDivElement>(null);
   const termInstance = useRef<Terminal | null>(null);
   const fitAddon = useRef<FitAddon | null>(null);
   const inputBuffer = useRef<string>('');
   const idleTimer = useRef<NodeJS.Timeout | null>(null);
+  const wsRef = useRef<WebSocket | null>(null);
 
   const resetIdleTimer = () => {
     if (idleTimer.current) clearTimeout(idleTimer.current);
@@ -36,13 +39,21 @@ export const TerminalClient = ({ onCommand, onIdleTimeout, idleTimeoutMs = 30000
 
   useImperativeHandle(innerRef, () => ({
     write: (data: string) => {
-      termInstance.current?.write(data.replace(/\n/g, '\r\n'));
+      if (wsRef.current && wsRef.current.readyState === WebSocket.OPEN) {
+        wsRef.current.send(data);
+      } else {
+        termInstance.current?.write(data.replace(/\n/g, '\r\n'));
+      }
     },
     writeln: (data: string) => {
-      termInstance.current?.writeln(data.replace(/\n/g, '\r\n'));
+      if (wsRef.current && wsRef.current.readyState === WebSocket.OPEN) {
+        wsRef.current.send(data + '\r\n');
+      } else {
+        termInstance.current?.writeln(data.replace(/\n/g, '\r\n'));
+      }
     },
     prompt: () => {
-      termInstance.current?.write('\r\n$ ');
+      if (!wsUrl) termInstance.current?.write('\r\n$ ');
     },
     clear: () => {
       termInstance.current?.clear();
@@ -76,41 +87,62 @@ export const TerminalClient = ({ onCommand, onIdleTimeout, idleTimeoutMs = 30000
     if (initialText) {
       term.writeln(initialText);
     }
-    
-    term.write('\r\n$ ');
 
-    term.onData(data => {
-      resetIdleTimer();
-      
-      const code = data.charCodeAt(0);
-      
-      if (code === 13) { // Enter
-        const cmd = inputBuffer.current.trim();
-        term.write('\r\n');
-        if (cmd) {
-          onCommand(cmd);
+    if (wsUrl) {
+      // Live Mode: Connect to WebSocket and attach
+      const ws = new WebSocket(wsUrl);
+      wsRef.current = ws;
+
+      const attachAddon = new AttachAddon(ws);
+      term.loadAddon(attachAddon);
+
+      ws.onopen = () => {
+        // Send initial resize
+        ws.send(JSON.stringify({ type: 'resize', cols: term.cols, rows: term.rows }));
+      };
+
+      term.onData(() => resetIdleTimer());
+
+    } else {
+      // Mock Mode
+      term.write('\r\n$ ');
+
+      term.onData(data => {
+        resetIdleTimer();
+        
+        const code = data.charCodeAt(0);
+        
+        if (code === 13) { // Enter
+          const cmd = inputBuffer.current.trim();
+          term.write('\r\n');
+          if (cmd) {
+            onCommand?.(cmd);
+          } else {
+            term.write('$ ');
+          }
+          inputBuffer.current = '';
+        } else if (code === 127) { // Backspace
+          if (inputBuffer.current.length > 0) {
+            inputBuffer.current = inputBuffer.current.slice(0, -1);
+            term.write('\b \b');
+          }
+        } else if (code === 3) { // Ctrl+C
+          term.write('^C\r\n$ ');
+          inputBuffer.current = '';
+        } else if (code < 32) {
+          // Ignore other control characters for now
         } else {
-          term.write('$ ');
+          inputBuffer.current += data;
+          term.write(data);
         }
-        inputBuffer.current = '';
-      } else if (code === 127) { // Backspace
-        if (inputBuffer.current.length > 0) {
-          inputBuffer.current = inputBuffer.current.slice(0, -1);
-          term.write('\b \b');
-        }
-      } else if (code === 3) { // Ctrl+C
-        term.write('^C\r\n$ ');
-        inputBuffer.current = '';
-      } else if (code < 32) {
-        // Ignore other control characters for now
-      } else {
-        inputBuffer.current += data;
-        term.write(data);
-      }
-    });
+      });
+    }
 
     const resizeObserver = new ResizeObserver(() => {
       fit.fit();
+      if (wsRef.current && wsRef.current.readyState === WebSocket.OPEN) {
+        wsRef.current.send(JSON.stringify({ type: 'resize', cols: term.cols, rows: term.rows }));
+      }
     });
     resizeObserver.observe(terminalRef.current);
 
@@ -119,9 +151,10 @@ export const TerminalClient = ({ onCommand, onIdleTimeout, idleTimeoutMs = 30000
     return () => {
       if (idleTimer.current) clearTimeout(idleTimer.current);
       resizeObserver.disconnect();
+      if (wsRef.current) wsRef.current.close();
       term.dispose();
     };
-  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [wsUrl]); // Re-initialize if wsUrl changes
 
   return (
     <div ref={terminalRef} style={{ width: '100%', height: '100%', minHeight: 400, overflow: 'hidden', padding: 8, background: '#0d1117', borderRadius: 8 }} />

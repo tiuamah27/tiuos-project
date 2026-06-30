@@ -52,8 +52,9 @@ export function TopBar({ title, subtitle }: TopBarProps) {
       gap: 12,
       background: 'var(--bg-surface)',
       flexShrink: 0,
-      position: 'relative',
-      zIndex: 10,
+      position: 'sticky',
+      top: 0,
+      zIndex: 50,
     }}>
       {/* Page title */}
       <div className="hide-on-mobile" style={{ marginRight: 8, display: 'flex', flexDirection: 'column', justifyContent: 'center', flexShrink: 0 }}>

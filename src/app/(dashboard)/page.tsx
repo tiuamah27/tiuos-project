@@ -1,19 +1,22 @@
 'use client';
 
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useTiuStore } from '@/store';
-import { getSystemMetrics, getContainers, getApps, getActivity, listFiles, readFile, getStorage } from '@/services';
+import { getSystemMetrics, getContainers, getApps, getActivity, listFiles, readFile, getStorage, startContainer, stopContainer, restartContainer, getContainerLogs } from '@/services';
 import { TopBar } from '@/components/layout/TopBar';
-import { Card, SectionLabel, StatusBadge, ProgressBar, Skeleton, ErrorState, CopyBox, EmptyState } from '@/components/ui';
+import { Card, SectionLabel, StatusBadge, ProgressBar, Skeleton, ErrorState, CopyBox, EmptyState, ConfirmDialog, LogViewerModal } from '@/components/ui';
 import { cpuColor, diskColor, statusLabel, formatRelativeTime, getFileIcon } from '@/lib/utils';
-import { Container, ActivityEvent, App, AppType, FileEntry, FileContent, StorageData } from '@/types';
+import { Container, ActivityEvent, App, AppType, FileEntry, FileContent, StorageData, LogLine } from '@/types';
 import { AreaChart, Area, ResponsiveContainer, LineChart, Line, CartesianGrid, XAxis, YAxis, Tooltip } from 'recharts';
 import { useState, useEffect, useRef, ReactNode, Fragment } from 'react';
 import {
   ExternalLink, GitBranch, GitCommit, Lock,
   ChevronRight, ChevronDown, ChevronLeft, ChevronUp, Folder, Database,
-  Server, MoreHorizontal, ArrowUpRight, History
+  Server, MoreHorizontal, ArrowUpRight, History,
+  Play, Square, RefreshCw, Terminal, Info
 } from 'lucide-react';
+import { toast } from 'sonner';
+import { useRouter } from 'next/navigation';
 
 // ═════════════════════════════════════════════════════════════
 // Shared Components
@@ -250,7 +253,48 @@ function ContainerSection({ containers, isLoading, error }:
   { containers?: Container[]; isLoading: boolean; error: Error | null }
 ) {
   const [selected, setSelected] = useState<Container | null>(null);
+  const { activeServerId, servers } = useTiuStore();
+  const serverUrl = servers.find(s => s.id === activeServerId)?.url ?? '';
+  const queryClient = useQueryClient();
+  const router = useRouter();
   const running = containers?.filter(c => c.status === 'running').length ?? 0;
+
+  const [confirmAction, setConfirmAction] = useState<{ type: 'stop' | 'restart', container: Container } | null>(null);
+  const [logsModal, setLogsModal] = useState<{ isOpen: boolean, container: Container | null, logs: LogLine[] }>({ isOpen: false, container: null, logs: [] });
+  const [logsLoading, setLogsLoading] = useState(false);
+
+  const invalidate = () => queryClient.invalidateQueries({ queryKey: ['containers', activeServerId] });
+
+  const startMutation = useMutation({
+    mutationFn: (id: string) => startContainer(serverUrl, id),
+    onSuccess: (res) => { toast.success(res.message); invalidate(); },
+    onError: (err) => toast.error(String(err))
+  });
+
+  const stopMutation = useMutation({
+    mutationFn: (id: string) => stopContainer(serverUrl, id),
+    onSuccess: (res) => { toast.success(res.message); invalidate(); setConfirmAction(null); },
+    onError: (err) => toast.error(String(err))
+  });
+
+  const restartMutation = useMutation({
+    mutationFn: (id: string) => restartContainer(serverUrl, id),
+    onSuccess: (res) => { toast.success(res.message); invalidate(); setConfirmAction(null); },
+    onError: (err) => toast.error(String(err))
+  });
+
+  const handleLogs = async (c: Container) => {
+    setLogsModal({ isOpen: true, container: c, logs: [] });
+    setLogsLoading(true);
+    try {
+      const logs = await getContainerLogs(serverUrl, c.id, 100);
+      setLogsModal({ isOpen: true, container: c, logs });
+    } catch (e) {
+      toast.error(String(e));
+    } finally {
+      setLogsLoading(false);
+    }
+  };
 
   return (
     <Panel
@@ -328,12 +372,49 @@ function ContainerSection({ containers, isLoading, error }:
                           <DetailRow label="Terakhir restart" value={formatRelativeTime(c.lastRestart)} />
                         </Card>
                       </div>
-                      <div>
+                      <div style={{ display: 'flex', flexDirection: 'column' }}>
+                        <SectionLabel>Actions</SectionLabel>
+                        <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, marginBottom: 16 }}>
+                          {c.status === 'running' ? (
+                            <>
+                              <button
+                                onClick={(e) => { e.stopPropagation(); setConfirmAction({ type: 'restart', container: c }); }}
+                                style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '6px 12px', borderRadius: 6, border: '1px solid var(--border-default)', background: 'var(--bg-surface)', color: 'var(--text-primary)', cursor: 'pointer', fontSize: 12, fontWeight: 500 }}
+                              >
+                                <RefreshCw size={13} /> Restart
+                              </button>
+                              <button
+                                onClick={(e) => { e.stopPropagation(); setConfirmAction({ type: 'stop', container: c }); }}
+                                style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '6px 12px', borderRadius: 6, border: '1px solid var(--danger-border)', background: 'var(--danger-bg)', color: 'var(--danger)', cursor: 'pointer', fontSize: 12, fontWeight: 500 }}
+                              >
+                                <Square size={13} fill="currentColor" /> Stop
+                              </button>
+                            </>
+                          ) : (
+                            <button
+                              disabled={startMutation.isPending}
+                              onClick={(e) => { e.stopPropagation(); startMutation.mutate(c.id); }}
+                              style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '6px 12px', borderRadius: 6, border: '1px solid var(--success-border)', background: 'var(--success-bg)', color: 'var(--success)', cursor: 'pointer', fontSize: 12, fontWeight: 500 }}
+                            >
+                              <Play size={13} fill="currentColor" /> {startMutation.isPending ? 'Starting...' : 'Start'}
+                            </button>
+                          )}
+                          <button
+                            onClick={(e) => { e.stopPropagation(); handleLogs(c); }}
+                            style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '6px 12px', borderRadius: 6, border: '1px solid var(--border-default)', background: 'var(--bg-surface)', color: 'var(--text-primary)', cursor: 'pointer', fontSize: 12, fontWeight: 500 }}
+                          >
+                            <Terminal size={13} /> Logs
+                          </button>
+                          <button
+                            onClick={(e) => { e.stopPropagation(); router.push(`/apps/${c.id}`); }}
+                            style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '6px 12px', borderRadius: 6, border: '1px solid var(--accent-border)', background: 'var(--accent-bg)', color: 'var(--accent)', cursor: 'pointer', fontSize: 12, fontWeight: 500 }}
+                          >
+                            <Info size={13} /> View Details
+                          </button>
+                        </div>
                         <SectionLabel>Terminal Commands</SectionLabel>
                         <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
-                          <CopyBox label="Log real-time" value={`docker logs ${c.name} -f`} />
                           <CopyBox label="Masuk shell" value={`docker exec -it ${c.name} sh`} />
-                          <CopyBox label="Restart" value={`docker restart ${c.name}`} />
                         </div>
                       </div>
                     </div>
@@ -344,6 +425,24 @@ function ContainerSection({ containers, isLoading, error }:
           })}
         </div>
       </div>
+      
+      <ConfirmDialog
+        isOpen={!!confirmAction}
+        title={confirmAction?.type === 'restart' ? 'Restart Container' : 'Stop Container'}
+        message={`Apakah Anda yakin ingin melakukan ${confirmAction?.type} pada container ${confirmAction?.container.name}?`}
+        confirmText={confirmAction?.type === 'restart' ? 'Restart' : 'Stop'}
+        variant={confirmAction?.type === 'restart' ? 'warning' : 'danger'}
+        isLoading={stopMutation.isPending || restartMutation.isPending}
+        onConfirm={() => confirmAction?.type === 'restart' ? restartMutation.mutate(confirmAction.container.id) : stopMutation.mutate(confirmAction!.container.id)}
+        onCancel={() => setConfirmAction(null)}
+      />
+      <LogViewerModal
+        isOpen={logsModal.isOpen}
+        title={logsModal.container?.name ?? ''}
+        logs={logsModal.logs}
+        isLoading={logsLoading}
+        onClose={() => setLogsModal({ ...logsModal, isOpen: false })}
+      />
     </Panel>
   );
 }

@@ -8,6 +8,7 @@ export const metadata: Metadata = {
 };
 
 import { CommandPalette } from '@/components/ui/CommandPalette';
+import { Toaster } from 'sonner';
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
@@ -24,6 +25,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <Providers>
           {children}
           <CommandPalette />
+          <Toaster theme="system" richColors position="bottom-right" />
         </Providers>
       </body>
     </html>

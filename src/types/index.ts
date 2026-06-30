@@ -138,3 +138,74 @@ export interface ApiResponse<T> {
   reason?: string;
   ts: number;
 }
+
+// ── Docker Actions ───────────────────────────
+export interface ActionResponse {
+  success: boolean;
+  message: string;
+}
+
+export interface LogLine {
+  text: string;
+  timestamp: string;
+}
+
+// ── Alerts & Notifications ───────────────────
+export interface AlertThresholds {
+  cpu: number;
+  ram: number;
+  disk: number;
+}
+
+export interface NotificationChannel {
+  enabled: boolean;
+  type: 'telegram' | 'discord' | 'email';
+  token?: string;
+  chatId?: string;
+  webhookUrl?: string;
+  emailTo?: string;
+}
+
+export interface MetricDataPoint {
+  time: string;
+  value: number;
+}
+
+export interface GitCommit {
+  hash: string;
+  message: string;
+  author: string;
+  date: string;
+}
+
+export interface EnvVar {
+  key: string;
+  value: string;
+  isSecret: boolean;
+}
+
+export interface AppDetails extends Container {
+  cpuHistory: MetricDataPoint[];
+  ramHistory: MetricDataPoint[];
+  responseTimeHistory: MetricDataPoint[];
+  commits: GitCommit[];
+  envVars: EnvVar[];
+  domain: string;
+  sslExpiryDays: number;
+  healthStatus: 'healthy' | 'degraded' | 'down';
+}
+
+export interface HealthLog {
+  timestamp: string;
+  status: 'healthy' | 'degraded' | 'down';
+  message: string;
+}
+
+export interface AppNotification {
+  id: string;
+  title: string;
+  message: string;
+  level: 'info' | 'warning' | 'error' | 'success';
+  timestamp: string;
+  read: boolean;
+}

@@ -1,6 +1,7 @@
 import {
   SystemMetrics, Container, StorageData, App,
-  ActivityEvent, InfrastructureSummary, FileEntry, FileContent
+  ActivityEvent, InfrastructureSummary, FileEntry, FileContent,
+  ActionResponse, LogLine, AppDetails, MetricDataPoint, GitCommit, EnvVar
 } from '@/types';
 
 // ── Helpers ──────────────────────────────────────────────────────────────
@@ -24,15 +25,32 @@ export function getMockSystem(): SystemMetrics {
 }
 
 export function getMockSystemB(): SystemMetrics {
+  return generateSystemMetricsForServer('server-b');
+}
+
+export function generateSystemMetricsForServer(serverId: string): SystemMetrics {
+  const seed = serverId.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
+  const now = Date.now();
+  
+  // Make metrics deterministically vary by server and time
+  const cpuBase = (seed % 60) + 10; // 10% to 70% base
+  const ramBase = (seed % 40) + 30; // 30% to 70% base
+  const diskBase = (seed % 50) + 20; // 20% to 70% base
+  
+  const timeOffset = Math.sin(now / 10000); // Oscillation over time
+  
+  const cpu = Math.min(100, Math.max(0, cpuBase + timeOffset * 20 + (Math.random() * 5)));
+  const ram = Math.min(100, Math.max(0, ramBase + timeOffset * 5 + (Math.random() * 2)));
+  
   return {
-    cpu: rand(2, 20),
-    cpuInfo: { cores: 4, ghz: 2.4 },
-    ram: { used: rand(1.2, 3.1), total: 4, percent: rand(30, 77) },
-    disk: { used: rand(40, 90), total: 250, percent: rand(16, 36) },
-    network: { download: rand(0.1, 2.0), upload: rand(0.05, 0.8) },
-    uptime: '3d 7h 11m',
-    hostname: 'tiuserver-b',
+    cpu,
+    ram: { used: ram * 0.08, total: 8, percent: ram },
+    disk: { used: diskBase * 5, total: 500, percent: diskBase },
+    uptime: `${Math.floor(seed % 30)} days`,
+    hostname: serverId,
     os: 'Ubuntu 22.04 LTS',
+    cpuInfo: { cores: 4, ghz: 2.4 },
+    network: { download: rand(0.1, 2.0), upload: rand(0.05, 0.8) },
     loadAvg: [rand(0.05, 0.5), rand(0.05, 0.4), rand(0.05, 0.3)],
   };
 }
@@ -235,3 +253,96 @@ docker compose up -d
 \`\`\``,
   },
 };
+
+// ── Docker Actions (Mock) ─────────────────────────────────────────────────
+export async function mockStartContainer(id: string): Promise<ActionResponse> {
+  const container = MOCK_CONTAINERS.find(c => c.id === id);
+  if (!container) return { success: false, message: 'Container tidak ditemukan' };
+  if (container.status === 'running') return { success: false, message: 'Container sudah berjalan' };
+  
+  container.status = 'running';
+  return { success: true, message: `Container ${container.name} berhasil dijalankan` };
+}
+
+export async function mockStopContainer(id: string): Promise<ActionResponse> {
+  const container = MOCK_CONTAINERS.find(c => c.id === id);
+  if (!container) return { success: false, message: 'Container tidak ditemukan' };
+  if (container.status !== 'running') return { success: false, message: 'Container tidak sedang berjalan' };
+  
+  container.status = 'stopped';
+  container.cpu = 0;
+  container.ram = 0;
+  return { success: true, message: `Container ${container.name} berhasil dihentikan` };
+}
+
+export async function mockRestartContainer(id: string): Promise<ActionResponse> {
+  const container = MOCK_CONTAINERS.find(c => c.id === id);
+  if (!container) return { success: false, message: 'Container tidak ditemukan' };
+  
+  container.status = 'running';
+  container.restartCount += 1;
+  container.lastRestart = new Date().toISOString();
+  return { success: true, message: `Container ${container.name} berhasil di-restart` };
+}
+
+export async function mockGetContainerLogs(id: string, tail: number = 100): Promise<LogLine[]> {
+  const container = MOCK_CONTAINERS.find(c => c.id === id);
+  if (!container) throw new Error('Container tidak ditemukan');
+  
+  const logs: LogLine[] = [];
+  const now = Date.now();
+  
+  for (let i = tail; i > 0; i--) {
+    const time = new Date(now - i * 1000).toISOString();
+    logs.push({
+      timestamp: time,
+      text: `[${time}] [${container.name}] Log entry ${tail - i + 1}: ${Math.random().toString(36).substring(7)}`
+    });
+  }
+  
+  return logs;
+}
+
+export function generateMockAppDetails(id: string): AppDetails {
+  const c = MOCK_CONTAINERS.find(c => c.id === id) || MOCK_CONTAINERS[0];
+  
+  const now = new Date();
+  const generateHistory = (base: number, variance: number): MetricDataPoint[] => {
+    return Array.from({ length: 24 }).map((_, i) => {
+      const time = new Date(now.getTime() - (23 - i) * 3600000).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+      return { time, value: Math.max(0, Math.min(100, base + (Math.random() * variance * 2 - variance))) };
+    });
+  };
+
+  const cpuHistory = generateHistory(c.cpu, 5);
+  const ramHistory = generateHistory((c.ram / 2048) * 100, 10);
+  const responseTimeHistory = Array.from({ length: 24 }).map((_, i) => ({
+    time: new Date(now.getTime() - (23 - i) * 3600000).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+    value: Math.max(20, Math.min(500, 150 + (Math.random() * 100 - 50)))
+  }));
+
+  const commits: GitCommit[] = [
+    { hash: 'a1b2c3d', message: 'Update configuration for production', author: 'tiuam', date: new Date(now.getTime() - 86400000).toISOString() },
+    { hash: 'e4f5g6h', message: 'Fix bug in login flow', author: 'johndoe', date: new Date(now.getTime() - 172800000).toISOString() },
+    { hash: 'i7j8k9l', message: 'Initial commit', author: 'tiuam', date: new Date(now.getTime() - 259200000).toISOString() },
+  ];
+
+  const envVars: EnvVar[] = [
+    { key: 'NODE_ENV', value: 'production', isSecret: false },
+    { key: 'PORT', value: c.ports[0]?.split(':')[0] || '80', isSecret: false },
+    { key: 'DATABASE_URL', value: 'postgresql://user:pass@db:5432/app', isSecret: true },
+    { key: 'API_KEY', value: 'sk_live_1234567890abcdef', isSecret: true },
+  ];
+
+  return {
+    ...c,
+    cpuHistory,
+    ramHistory,
+    responseTimeHistory,
+    commits,
+    envVars,
+    domain: `${c.name}.tiuos.local`,
+    sslExpiryDays: Math.floor(Math.random() * 60) + 10,
+    healthStatus: c.status === 'running' ? 'healthy' : 'down',
+  };
+}

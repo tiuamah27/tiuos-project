@@ -4,12 +4,14 @@ import { useEffect, useState } from 'react';
 import { Command } from 'cmdk';
 import { useTheme } from 'next-themes';
 import { useTiuStore } from '@/store';
+import { useRouter } from 'next/navigation';
 import './command-palette.css';
 
 export function CommandPalette() {
   const [open, setOpen] = useState(false);
   const { theme, setTheme } = useTheme();
   const { dataMode, setDataMode } = useTiuStore();
+  const router = useRouter();
 
   useEffect(() => {
     const down = (e: KeyboardEvent) => {
@@ -39,6 +41,12 @@ export function CommandPalette() {
               </Command.Item>
               <Command.Item onSelect={() => { setTheme('dark'); setOpen(false); }}>
                 Ubah ke Tema Gelap (Dark Mode)
+              </Command.Item>
+            </Command.Group>
+
+            <Command.Group heading="Terminal">
+              <Command.Item onSelect={() => { router.push('/terminal'); setOpen(false); }}>
+                Buka Terminal (Web SSH)
               </Command.Item>
             </Command.Group>
 

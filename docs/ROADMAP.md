@@ -29,27 +29,27 @@ Fitur yang sudah selesai:
 > **Goal:** Mengubah TiuOS dari "read-only dashboard" menjadi "actionable management tool"
 
 ### 1.1 Container Controls
-- [ ] Tombol **Start** container yang sedang stopped
-- [ ] Tombol **Stop** container yang sedang running
-- [ ] Tombol **Restart** container
-- [ ] Konfirmasi dialog sebelum aksi destructive (stop/restart)
-- [ ] Toast/notifikasi sukses/gagal setelah aksi
-- [ ] Loading state saat menunggu respons aksi
+- [x] Tombol **Start** container yang sedang stopped
+- [x] Tombol **Stop** container yang sedang running
+- [x] Tombol **Restart** container
+- [x] Konfirmasi dialog sebelum aksi destructive (stop/restart)
+- [x] Toast/notifikasi sukses/gagal setelah aksi
+- [x] Loading state saat menunggu respons aksi
 
 ### 1.2 Container Logs (Real-time)
-- [ ] Halaman/modal untuk melihat log container
-- [ ] Streaming log secara real-time (WebSocket atau SSE)
-- [ ] Fitur search/filter dalam log
-- [ ] Tombol download log sebagai file `.txt`
-- [ ] Auto-scroll ke bawah dengan toggle on/off
-- [ ] Pilihan jumlah baris (tail 100, 500, 1000)
+- [x] Halaman/modal untuk melihat log container
+- [x] Streaming log secara real-time (WebSocket atau SSE)
+- [x] Fitur search/filter dalam log
+- [x] Tombol download log sebagai file `.txt`
+- [x] Auto-scroll ke bawah dengan toggle on/off
+- [x] Pilihan jumlah baris (tail 100, 500, 1000)
 
 ### 1.3 Update TiuAgent
-- [ ] Endpoint `POST /api/v1/docker/:id/start`
-- [ ] Endpoint `POST /api/v1/docker/:id/stop`
-- [ ] Endpoint `POST /api/v1/docker/:id/restart`
-- [ ] Endpoint `GET /api/v1/docker/:id/logs?tail=100`
-- [ ] WebSocket endpoint untuk streaming log
+- [x] Endpoint `POST /api/v1/docker/:id/start`
+- [x] Endpoint `POST /api/v1/docker/:id/stop`
+- [x] Endpoint `POST /api/v1/docker/:id/restart`
+- [x] Endpoint `GET /api/v1/docker/:id/logs?tail=100`
+- [x] WebSocket endpoint untuk streaming log
 
 ---
 
@@ -58,25 +58,25 @@ Fitur yang sudah selesai:
 > **Goal:** TiuOS bisa memberi peringatan otomatis saat ada masalah di server
 
 ### 2.1 Alert Rules
-- [ ] Konfigurasi threshold alert (misal: CPU > 90%, Disk > 85%)
-- [ ] Alert saat container mati/crash
-- [ ] Alert saat container restart berulang (crash loop)
-- [ ] Alert saat disk space hampir penuh
-- [ ] Alert saat RAM usage tinggi berkepanjangan
-- [ ] Cooldown period (jangan spam notifikasi berulang)
+- [x] Konfigurasi threshold alert (misal: CPU > 90%, Disk > 85%)
+- [x] Alert saat container mati/crash
+- [x] Alert saat container restart berulang (crash loop)
+- [x] Alert saat disk space hampir penuh
+- [x] Alert saat RAM usage tinggi berkepanjangan
+- [x] Cooldown period (jangan spam notifikasi berulang)
 
 ### 2.2 Notification Channels
-- [ ] **Telegram Bot** — kirim pesan ke chat/group
-- [ ] **Discord Webhook** — kirim ke channel Discord
-- [ ] **Email** (SMTP) — kirim email notifikasi
-- [ ] **In-app notification** — bell icon di topbar dengan badge count
-- [ ] Notification history (log semua alert yang pernah dikirim)
+- [x] **Telegram Bot** — kirim pesan ke chat/group
+- [x] **Discord Webhook** — kirim ke channel Discord
+- [x] **Email** (SMTP) — kirim email notifikasi
+- [x] **In-app notification** — bell icon di topbar dengan badge count
+- [x] Notification history (log semua alert yang pernah dikirim)
 
 ### 2.3 Settings UI
-- [ ] Halaman settings untuk konfigurasi channel notifikasi
-- [ ] Test button ("Kirim Notifikasi Test")
-- [ ] Enable/disable per channel
-- [ ] Konfigurasi threshold per metrik
+- [x] Halaman settings untuk konfigurasi channel notifikasi
+- [x] Test button ("Kirim Notifikasi Test")
+- [x] Enable/disable per channel
+- [x] Konfigurasi threshold per metrik
 
 ---
 
@@ -85,22 +85,22 @@ Fitur yang sudah selesai:
 > **Goal:** Akses terminal server langsung dari browser tanpa perlu SSH client
 
 ### 3.1 Terminal Emulator
-- [ ] Embedded terminal menggunakan xterm.js
-- [ ] Koneksi ke server via WebSocket
-- [ ] Support copy/paste
-- [ ] Support resize terminal
-- [ ] Multiple tab terminal
-- [ ] Riwayat command
+- [x] Embedded terminal menggunakan xterm.js
+- [x] Koneksi ke server via WebSocket
+- [x] Support copy/paste
+- [x] Support resize terminal
+- [x] Multiple tab terminal
+- [x] Riwayat command
 
 ### 3.2 Quick Commands
-- [ ] Predefined quick commands (restart docker, check disk, dll)
-- [ ] Custom command favorites/bookmarks
-- [ ] Command palette (Ctrl+K) untuk akses cepat
+- [x] Predefined quick commands (restart docker, check disk, dll)
+- [x] Custom command favorites/bookmarks
+- [x] Command palette (Ctrl+K) untuk akses cepat
 
 ### 3.3 Keamanan
-- [ ] Session timeout otomatis
-- [ ] Audit log (siapa menjalankan command apa, kapan)
-- [ ] Whitelist command (opsional, untuk keamanan ekstra)
+- [x] Session timeout otomatis
+- [x] Audit log (siapa menjalankan command apa, kapan)
+- [x] Whitelist command (opsional, untuk keamanan ekstra)
 
 ---
 
@@ -109,25 +109,25 @@ Fitur yang sudah selesai:
 > **Goal:** Setiap aplikasi memiliki halaman detail lengkap
 
 ### 4.1 App Detail Page
-- [ ] Route `/apps/:id` untuk setiap aplikasi
-- [ ] Resource usage khusus container tersebut (CPU, RAM timeline)
-- [ ] Uptime history (kapan saja container up/down)
-- [ ] Environment variables (dengan sensor untuk secrets)
-- [ ] Port mapping & network info
-- [ ] Image info & version history
+- [x] Route `/apps/:id` untuk setiap aplikasi
+- [x] Resource usage khusus container tersebut (CPU, RAM timeline)
+- [x] Uptime history (kapan saja container up/down)
+- [x] Environment variables (dengan sensor untuk secrets)
+- [x] Port mapping & network info
+- [x] Image info & version history
 
 ### 4.2 Deploy & Git Integration
-- [ ] Git commit history (untuk app dari GitHub seperti HanFin)
-- [ ] Tombol **Redeploy** (pull latest + restart)
-- [ ] Deploy log / build output
-- [ ] Webhook endpoint untuk auto-deploy dari GitHub push
-- [ ] Rollback ke versi sebelumnya
+- [x] Git commit history (untuk app dari GitHub seperti HanFin)
+- [x] Tombol **Redeploy** (pull latest + restart)
+- [x] Deploy log / build output
+- [x] Webhook endpoint untuk auto-deploy dari GitHub push
+- [x] Rollback ke versi sebelumnya
 
 ### 4.3 App Health
-- [ ] Healthcheck history chart
-- [ ] Response time monitoring (jika app punya URL)
-- [ ] SSL certificate expiry check
-- [ ] Domain/DNS status check
+- [x] Healthcheck history chart
+- [x] Response time monitoring (jika app punya URL)
+- [x] SSL certificate expiry check
+- [x] Domain/DNS status check
 
 ---
 
@@ -161,16 +161,16 @@ Fitur yang sudah selesai:
 > **Goal:** Monitor dan kelola beberapa server dari satu TiuOS instance
 
 ### 6.1 Server Management
-- [ ] Tambah/hapus server dari UI
-- [ ] Switch antar server via sidebar (infrastruktur sudah ada)
-- [ ] Setiap server punya TiuAgent sendiri
-- [ ] Status indicator per server (online/offline) di sidebar
+- [x] Tambah/hapus server dari UI
+- [x] Switch antar server via sidebar (infrastruktur sudah ada)
+- [x] Setiap server punya TiuAgent sendiri
+- [x] Status indicator per server (online/offline) di sidebar
 
 ### 6.2 Aggregate View
-- [ ] Overview page yang menampilkan ringkasan semua server
-- [ ] Total resource usage across all servers
-- [ ] Alert summary dari semua server
-- [ ] Quick comparison antar server
+- [x] Overview page yang menampilkan ringkasan semua server
+- [x] Total resource usage across all servers
+- [x] Alert summary dari semua server
+- [x] Quick comparison antar server
 
 ---
 
@@ -227,26 +227,26 @@ Fitur yang sudah selesai:
 > **Goal:** Rebuild TiuAgent dari nol agar sesuai 100% dengan TiuOS
 
 ### 9.1 Core
-- [ ] Finalisasi API Contract dari `src/types/index.ts`
-- [ ] Setup project baru (Fastify / Express / Hono)
-- [ ] Endpoint `/api/v1/system` — match SystemMetrics type
-- [ ] Endpoint `/api/v1/docker` — match Container type
-- [ ] Endpoint `/api/v1/apps` — match App type
-- [ ] Endpoint `/api/v1/storage` — match StorageData type
-- [ ] Endpoint `/api/v1/activity` — match ActivityEvent type
-- [ ] Endpoint `/api/v1/files` — match FileEntry/FileContent type
+- [x] Finalisasi API Contract dari `src/types/index.ts`
+- [x] Setup project baru (Fastify / Express / Hono)
+- [x] Endpoint `/api/v1/system` — match SystemMetrics type
+- [x] Endpoint `/api/v1/docker` — match Container type
+- [x] Endpoint `/api/v1/apps` — match App type
+- [x] Endpoint `/api/v1/storage` — match StorageData type
+- [x] Endpoint `/api/v1/activity` — match ActivityEvent type
+- [x] Endpoint `/api/v1/files` — match FileEntry/FileContent type
 
 ### 9.2 Docker Integration
-- [ ] Komunikasi via Docker Socket (`/var/run/docker.sock`)
-- [ ] Auto-detect containers & apps
-- [ ] Label-based categorization (`tiuos.type`, `tiuos.url`)
-- [ ] Container stats streaming
+- [x] Komunikasi via Docker Socket (`/var/run/docker.sock`)
+- [x] Auto-detect containers & apps
+- [x] Label-based categorization (`tiuos.type`, `tiuos.url`)
+- [x] Container stats streaming
 
 ### 9.3 Deployment
-- [ ] Docker image untuk TiuAgent sendiri
-- [ ] Docker Compose setup (TiuAgent + dependencies)
-- [ ] Dokumentasi instalasi
-- [ ] Auto-update mechanism
+- [x] Docker image untuk TiuAgent sendiri
+- [x] Docker Compose setup (TiuAgent + dependencies)
+- [x] Dokumentasi instalasi
+- [x] Auto-update mechanism
 
 ---
 

@@ -1,9 +1,11 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import { useAlertMonitor } from '@/hooks/useAlertMonitor';
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
   const [mounted, setMounted] = useState(false);
+  useAlertMonitor();
 
   useEffect(() => setMounted(true), []);
 

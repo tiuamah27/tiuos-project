@@ -139,14 +139,14 @@ export default function OverviewPage() {
                         <span style={{ color: 'var(--text-muted)' }}>CPU</span>
                         <span style={{ fontWeight: 600, color: cpuColor(item.metrics.cpu) }}>{item.metrics.cpu.toFixed(1)}%</span>
                       </div>
-                      <ProgressBar value={item.metrics.cpu} color={cpuColor(item.metrics.cpu)} height={6} />
+                      <ProgressBar value={item.metrics.cpu} color={cpuColor(item.metrics.cpu)} />
                     </div>
                     <div>
                       <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 12, marginBottom: 4 }}>
                         <span style={{ color: 'var(--text-muted)' }}>RAM</span>
                         <span style={{ fontWeight: 600, color: cpuColor(item.metrics.ram.percent) }}>{item.metrics.ram.used.toFixed(1)} GB</span>
                       </div>
-                      <ProgressBar value={item.metrics.ram.percent} color={cpuColor(item.metrics.ram.percent)} height={6} />
+                      <ProgressBar value={item.metrics.ram.percent} color={cpuColor(item.metrics.ram.percent)} />
                     </div>
                     
                     <div style={{ display: 'flex', gap: 16, marginTop: 8, paddingTop: 12, borderTop: '1px solid var(--border-subtle)', fontSize: 12, color: 'var(--text-secondary)' }}>

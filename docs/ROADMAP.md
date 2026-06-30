@@ -250,6 +250,29 @@ Fitur yang sudah selesai:
 
 ---
 
+## 🌡️ Phase 10 — IoT & Physical Server Monitoring
+
+> **Goal:** Memantau suhu hardware server dan rak fisik, serta mengontrol kipas secara otomatis via mikrokontroler (ESP32)
+
+### 10.1 Server Hardware Temperature (Tahap 1)
+- [ ] Integrasi `lm-sensors` di Linux (Debian)
+- [ ] TiuAgent: Endpoint untuk membaca suhu CPU dan Motherboard (`/sys/class/thermal/`)
+- [ ] TiuOS: Tambahkan grafik/angka suhu CPU di atas grafik CPU (%) saat ini
+
+### 10.2 Server Rack Environment (Tahap 2 - ESP32)
+- [ ] Setup Hardware: ESP32 + Sensor Suhu (DHT22/DS18B20) di dalam rak
+- [ ] Setup Hardware: Sensor Listrik (PZEM-004T) untuk memantau Watt/Ampere/Voltase rak
+- [ ] Setup Hardware: Kipas PC (PWM) yang terhubung ke ESP32
+- [ ] Kode ESP32: Logika kontrol otomatis RPM kipas berdasarkan suhu rak (berdiri sendiri / mandiri)
+
+### 10.3 IoT Communication (Tahap 3)
+- [ ] Deploy MQTT Broker (misal: Eclipse Mosquitto) via Docker di server
+- [ ] Kode ESP32: Publish data suhu dan listrik ke MQTT Broker via WiFi
+- [ ] TiuAgent: Berperan sebagai MQTT Client untuk melakukan *subscribe* dan menerima data dari ESP32
+- [ ] TiuOS: Dashboard khusus "Physical Environment" untuk menampilkan grafik suhu rak, konsumsi listrik, dan status kipas
+
+---
+
 ## 💡 Ide Tambahan (Someday / Maybe)
 
 Belum dijadwalkan, bisa diambil kapan saja:
